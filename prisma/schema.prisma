@@ -1,0 +1,57 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int          @id @default(autoincrement())
+  email       String       @unique
+  hash        String
+  salt        String
+  account     Account?
+  expenseList ExpenseList?
+}
+
+model Account {
+  id       Int    @id @default(autoincrement())
+  username String
+  ownerId  Int    @unique
+  owner    User   @relation(fields: [ownerId], references: [id])
+}
+
+model ExpenseList {
+  id      Int           @id @default(autoincrement())
+  items   ExpenseItem[]
+  ownerId Int           @unique
+  owner   User          @relation(fields: [ownerId], references: [id])
+}
+
+model ExpenseItem {
+  id        Int      @id @default(autoincrement())
+  name      String?
+  count     Int?
+  price     Int
+  type      String
+  createdAt DateTime @default(now())
+
+  expenseListId Int
+  expenseList   ExpenseList @relation(fields: [expenseListId], references: [id])
+}
+
+model ExpenseType {
+  id       Int             @id @default(autoincrement())
+  name     String
+  formType ExpenseFormType
+}
+
+enum ExpenseFormType {
+  Full
+  Single
+}
